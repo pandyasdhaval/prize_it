@@ -1,30 +1,100 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:prize_it/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('FAB adds prize cards', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('PrizeIt'), findsOneWidget);
+    expect(find.text('Clear All'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Cost: '), findsOneWidget);
+    expect(find.text('Units: '), findsOneWidget);
+    expect(find.text('NA'), findsOneWidget);
+  });
+
+  testWidgets('Clear All', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    expect(find.text('PrizeIt'), findsOneWidget);
+    expect(find.text('Clear All'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    expect(find.text('Cost: '), findsNWidgets(3));
+    expect(find.text('Units: '), findsNWidgets(3));
+    expect(find.text('NA'), findsNWidgets(3));
+
+    await tester.tap(find.text('Clear All'));
+    await tester.pump();
+
+    expect(find.text('Cost: '), findsNothing);
+    expect(find.text('Units: '), findsNothing);
+    expect(find.text('NA'), findsNothing);
+  });
+
+  testWidgets('Valid Cost, Empty Units should have NA result', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    await tester.enterText(find.widgetWithText(TextField, 'Cost: '), '1');
+    await tester.pump();
+
+    expect(find.text('Cost: '), findsNothing);
+    expect(find.text('Units: '), findsOneWidget);
+    expect(find.text('NA'), findsOneWidget);
+  });
+
+  testWidgets('Empty Cost, Valid Units should have NA result', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    await tester.enterText(find.widgetWithText(TextField, 'Units: '), '1');
+    await tester.pump();
+
+    expect(find.text('Cost: '), findsOneWidget);
+    expect(find.text('Units: '), findsNothing);
+    expect(find.text('NA'), findsOneWidget);
+  });
+
+  testWidgets('0 Units should have NA result', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    await tester.enterText(find.widgetWithText(TextField, 'Units: '), '0');
+    await tester.pump();
+
+    expect(find.text('Cost: '), findsOneWidget);
+    expect(find.text('Units: '), findsNothing);
+    expect(find.text('NA'), findsOneWidget);
+  });
+
+  testWidgets('Valid calculation', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    await tester.enterText(find.widgetWithText(TextField, 'Cost: '), '1');
+    await tester.enterText(find.widgetWithText(TextField, 'Units: '), '2');
+    await tester.pump();
+
+    expect(find.text('Cost: '), findsNothing);
+    expect(find.text('Units: '), findsNothing);
+    expect(find.text('0.5'), findsOneWidget);
   });
 }
